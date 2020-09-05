@@ -64,10 +64,10 @@ def hypothesis_function(t0, t1, x1):
 #Equation:
 #J = (1/2n) * sum( h - y )^ 2
 #    PART1        PART2
-def loss_function(train, theta):
+def loss_function(dataset, theta):
 
     #getting number of observations
-    n = float(len(train))
+    n = float(len(dataset))
     
     #get m and b(intercept b and slope m)
     theta_0 = theta[0]
@@ -94,8 +94,43 @@ def loss_function(train, theta):
         
     return mean_squared_error
 
-loss_function(train, theta)
+#The objective is to minimize loss (error).
+#This can be done by calculating the gradient of the loss function.
+def compute_gradients_of_loss_function(dataset, theta):
 
+    #initializing the gradients to zero
+    gradients_of_loss_function = np.zeros(2)
+    
+    #getting number of observations
+    n = float(len(dataset))
+    
+    #get m and b(intercept b and slope m)
+    theta_0 = theta[0]
+    theta_1 = theta[1]
+        
+    #Will iterate through each point from set provided
+    for index, row in stocks.iterrows():
+        
+        #get x and y from datasets
+        x_1 = row['Emerging-Markets-Index']
+        #y actual
+        y = row['ISE(USD)']
+        
+        #Hypothesis function (predict the value of y (y_hat) )
+        h_0 =hypothesis_function(theta_0, theta_1, x_1)
+        
+        
+        gradients_of_loss_function[0] += - (2 / n) * x_1 * ( y - h_0 )
+        
+        gradients_of_loss_function[1] += - (2 / n) * ( y - h_0 )
+    
+    
+    epsilon = 1e-8
+    gradients_of_loss_function = np.divide(gradients_of_loss_function, n + epsilon)
+
+    return gradients_of_loss_function
+
+compute_gradients_of_loss_function(train,theta)
 
 
 ##################################
