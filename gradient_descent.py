@@ -83,13 +83,13 @@ def loss_function(train, theta):
         #y actual
         y = row['ISE(USD)']
         
-        #Hypothesis function (predict the value of y or y_hat)
+        #Hypothesis function (predict the value of y (y_hat) )
         h_0 =hypothesis_function(theta_0, theta_1, x_1)
         
-        #Sum of loss (sum of squared error) - PART2
+        #Sum of loss (sum of squared error) - PART2 Equation
         loss = loss + ((h_0 - y) ** 2)
         
-    #mean sqaured error - dividing sum by n observations - PART1
+    #mean sqaured error - dividing sum by n observations - PART1 Equation
     mean_squared_error = loss / n
         
     return mean_squared_error
