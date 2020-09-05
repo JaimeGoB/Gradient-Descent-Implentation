@@ -7,13 +7,8 @@ import seaborn as sns
 #reading file from url
 url = 'https://raw.githubusercontent.com/JaimeGoB/Data-Sets/master/data_instanbul.csv'
 stocks = pd.read_csv(url)
-
-
+#renaming the response variables.
 stocks.rename(columns={"ISE": "ISE(Lira)", "ISE.1": "ISE(USD)"}, inplace =True)
-
-stocks.head()
-
-
 
 ##################################
 #Data-Preprocessing
@@ -31,7 +26,5 @@ plt.show()
 correlation_matrix = stocks.corr().round(2)
 #annot = True to print the values inside the square
 sns.heatmap(data=correlation_matrix, annot=True)
-
-
 
 
