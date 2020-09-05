@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
-import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
 from sklearn.model_selection import train_test_split
+import random
 
 
 
@@ -17,12 +17,7 @@ stocks = pd.read_csv(url)
 
 #renaming the response variables.
 stocks.rename(columns={"ISE.1": "ISE(USD)"}, inplace =True)
-stocks.rename(columns={"SP": "S&P500"}, inplace =True)
-
-
-#we will drop the ISE Lira value and only keep ISE USD value.
-stocks.drop(['ISE'], axis=1, inplace = True)
-stocks.drop(['date'], axis=1, inplace = True)
+stocks.rename(columns={"EM": "Emerging-Markets-Index"}, inplace =True)
 
 #checking for missing values or NaN
 stocks.isna().sum()
@@ -33,29 +28,86 @@ sns.distplot(stocks['ISE(USD)'], bins=30)
 plt.show()
 
 #Checking correlation between predictors 
+#We will use Emerging Markets Index.
 correlation_matrix = stocks.corr().round(2)
 #annot = True to print the values inside the square
 sns.heatmap(data=correlation_matrix, annot=True)
+
+#In our linear regression model we will use:
+#Emerging-Markets-Index to predict ISE price in USD.
+stocks.drop(['ISE'], axis=1, inplace = True)
+stocks.drop(['date'], axis=1, inplace = True)
+stocks.drop(['SP'], axis=1, inplace = True)
+stocks.drop(['DAX'], axis=1, inplace = True)
+stocks.drop(['FTSE'], axis=1, inplace = True)
+stocks.drop(['NIKKEI'], axis=1, inplace = True)
+stocks.drop(['BOVESPA'], axis=1, inplace = True)
+stocks.drop(['EU'], axis=1, inplace = True)
 
 ##################################
 #4. Spliting the dataset into training and test parts. 
 ##################################
 
-#Splitting up the dataset between predictors and responses.
-X = pd.DataFrame(np.c_[stocks['S&P500'], stocks['DAX'], stocks['FTSE'], stocks['NIKKEI'], stocks['BOVESPA'], stocks['EU'], stocks['EM']], columns=['S&P500','DAX', 'FTSE', 'NIKKEI', 'BOVESPA', 'EU', 'EM'])
-Y = pd.DataFrame(stocks['ISE(USD)'])
+#Will be used to hold values of thetas(theta_knot and theta_1)
+theta = np.zeros(2)
 
 #Splitting datasets in training and test
-x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, random_state=9)
+x_train, x_test, y_train, y_test = train_test_split(stocks["Emerging-Markets-Index"], stocks["ISE(USD)"], test_size = 0.2, random_state=9)
 
+train = stocks[:int(len(stocks)*0.85)]
+test = stocks[len(train):]
 
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
 ##################################
+
+#h_theta(x) = theta_0 + theta_1(x_1) AKA y  = b + mx
+def hypothesis_function(t0, t1, x1):
+    return (t0 + t1 * x1)
+
+#Equation:
+#J = (1/2n) * sum( h - y )^ 2
+#    PART1        PART2
+def loss_function(train, theta):
+
+    #getting number of observations
+    n = float(len(train))
+    
+    #get m and b(intercept b and slope m)
+    theta_0 = theta[0]
+    theta_1 = theta[1]
+    
+    loss = 0
+    
+    #Will iterate through each point from set provided
+    for index, row in stocks.iterrows():
+        
+        #get x and y from datasets
+        x_1 = row['Emerging-Markets-Index']
+        #y actual
+        y = row['ISE(USD)']
+        
+        #Hypothesis function (predict the value of y or y_hat)
+        h_0 =hypothesis_function(theta_0, theta_1, x_1)
+        
+        #Sum of loss (sum of squared error) - PART2
+        loss = loss + ((h_0 - y) ** 2)
+        
+    #mean sqaured error - dividing sum by n observations - PART1
+    mean_squared_error = loss / n
+        
+    return mean_squared_error
+
+loss_function(train, theta)
 
 
 
 ##################################
 #6. Apply the model to the test part of the dataset.
 ##################################
+
+
+
+
+
 
