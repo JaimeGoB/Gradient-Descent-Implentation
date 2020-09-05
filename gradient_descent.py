@@ -5,21 +5,33 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 
 #reading file from url
-url = 'https://raw.githubusercontent.com/JaimeGoB/Data-Sets/master/SeoulBikeData.csv'
+url = 'https://raw.githubusercontent.com/JaimeGoB/Data-Sets/master/data_instanbul.csv'
+stocks = pd.read_csv(url)
 
-#using encoding flag to solve UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb0 in position 12: invalid start byte
-bikes = pd.read_csv(url, encoding= 'unicode_escape')
 
-bikes.isna().sum()
+stocks.rename(columns={"ISE": "ISE(Lira)", "ISE.1": "ISE(USD)"}, inplace =True)
 
-bikes.head()
+stocks.head()
 
-#
+
+
+##################################
+#Data-Preprocessing
+##################################
+
+#checking for missing values or NaN
+stocks.isna().sum()
+
+#Checking if dependent variable has a linear relationship with the attributes.
 sns.set(rc={'figure.figsize':(11.7,8.27)})
-sns.distplot(bikes['Rented Bike Count'], bins=50)
+sns.distplot(stocks['ISE(USD)'], bins=30)
 plt.show()
 
-
-correlation_matrix = bikes.corr().round(2)
-# annot = True to print the values inside the square
+#Checking correlation between predictors 
+correlation_matrix = stocks.corr().round(2)
+#annot = True to print the values inside the square
 sns.heatmap(data=correlation_matrix, annot=True)
+
+
+
+
