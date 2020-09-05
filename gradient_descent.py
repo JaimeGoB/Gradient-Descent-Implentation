@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
-from sklearn.model_selection import train_test_split
-import random
 
 
 
@@ -52,8 +50,6 @@ stocks.drop(['EU'], axis=1, inplace = True)
 theta = np.zeros(2)
 
 #Splitting datasets in training and test
-x_train, x_test, y_train, y_test = train_test_split(stocks["Emerging-Markets-Index"], stocks["ISE(USD)"], test_size = 0.2, random_state=9)
-
 train = stocks[:int(len(stocks)*0.85)]
 test = stocks[len(train):]
 
