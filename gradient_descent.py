@@ -58,6 +58,7 @@ test = stocks[len(train):]
 theta = np.zeros(2)
 
 
+
 #h_theta(x) = theta_0 + theta_1(x_1) AKA y  = b + mx
 def hypothesis_function(t0, t1, x1):
     return (t0 + t1 * x1)
@@ -91,7 +92,7 @@ def loss_function(dataset, theta):
         loss = loss + ((h_0 - y) ** 2)
         
     #mean sqaured error - dividing sum by n observations - PART1 Equation
-    mean_squared_error = loss / n
+    mean_squared_error = loss / (2 * n)
         
     return mean_squared_error
 
@@ -121,9 +122,9 @@ def compute_gradients_of_loss_function(dataset, theta):
         h_0 =hypothesis_function(theta_0, theta_1, x_1)
         
         
-        gradients_of_loss_function[0] += - (2 / n) * x_1 * ( y - h_0 )
+        gradients_of_loss_function[0] += - (2 / n)  * ( y - h_0 )
         
-        gradients_of_loss_function[1] += - (2 / n) * ( y - h_0 )
+        gradients_of_loss_function[1] += - (2 / n) * x_1 * ( y - h_0 )
     
     
     epsilon = 1e-8
@@ -183,10 +184,7 @@ def random_initialization_thetaas():
 theta = random_initialization_thetaas()
 lr = get_random_learning_rate()
 
-print(theta)
-print(lr)
-
-loss = Adaptive_Gradient_Optimizer(train, theta, lr, 300)
+loss = Adaptive_Gradient_Optimizer(train, theta, 1e-3, 300)
 
 plt.plot(loss)
 plt.grid()
