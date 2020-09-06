@@ -131,6 +131,7 @@ def compute_gradients_of_loss_function(dataset, theta):
 
     return gradients_of_loss_function
 
+        
 #Equation of Adaptive gradient descent
 #0_t = 0_t-1 - alfa (gradients / sqrt(sum_of_gradients + epsilon) )
 def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 300, e = 1e-8):
@@ -154,23 +155,38 @@ def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 
         theta = theta - (learning_rate * gradient_over_ss_gradient)
 
         #keep track of loss
-        loss.append(loss_function(data,theta))
+        cost = loss_function(data,theta)
+        
+        #stopping condition
+        if len(loss) > 0:
+            #check if cost is increasing
+            if loss[-1] < cost:
+                break 
+            
+        #add error ONLY IFF IT is decreasing
+        loss.append(cost)
+
+    
 
     return loss
 
 #Use to tune the learning rate
 def get_random_learning_rate():
-    learning_rate = 10 ** random.uniform(-6, 1)
+    learning_rate = random.uniform(.0001, .001)
     return learning_rate
-                             
+                    
+#You want to randmly initialize weights to a value close to zero         
+def random_initialization_thetaas():
+   w = np.random.uniform(low=0.00000005, high=0.000001, size=(2,))
+   return w 
 
-
-
-theta = np.zeros(2)
-
+theta = random_initialization_thetaas()
 lr = get_random_learning_rate()
-loss = Adaptive_Gradient_Optimizer(train, theta, lr, 300)
 
+print(theta)
+print(lr)
+
+loss = Adaptive_Gradient_Optimizer(train, theta, lr, 300)
 
 plt.plot(loss)
 plt.grid()
@@ -179,24 +195,24 @@ plt.xlabel('Training Iterations')
 plt.ylabel('Cost ')
 
 
-#Good - use as parameter learning rate and iterations
-#0.00074307775216506 300
-#0.00047196199034994004 500
+#Best learning rate 0.0005791399329246217 - 0.0009324095198754966
 
+#Best random theta weights and random learning rate
+#[8.26281591e-07 6.98455793e-07]
+#0.0005914531330325669
 
-#(straing line going down 45 angle)
-#3.758255895832423e-08
-#3.758255895832423e-06
-##3.758255895832423e-07
-#5.28215963754875e-06  
-#2.1597591129217853e-06
-#1.8286814084952717e-06
-#2.3077811957482714e-05
-#0.0003929680460792898
-#0.00012880000984335732
+#[8.28422997e-07 2.73494230e-07]
+#0.0008494101979891405
 
-#BAD > 0.009
+#[5.90831622e-07 5.35492747e-07]
+#0.0009433691160820722
 
+#[7.49175543e-07 6.15714291e-07]
+#0.0008999066818002277
+
+#Does not work
+#[7.92046831e-07 1.55315672e-07]
+#0.00012423721494705947
 
 
 ##################################
