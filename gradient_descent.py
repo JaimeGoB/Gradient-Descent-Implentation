@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
-
+import random
 
 
 ##################################
@@ -46,9 +46,6 @@ stocks.drop(['EU'], axis=1, inplace = True)
 #4. Spliting the dataset into training and test parts. 
 ##################################
 
-#Will be used to hold values of thetas(theta_knot and theta_1)
-theta = np.zeros(2)
-
 #Splitting datasets in training and test
 train = stocks[:int(len(stocks)*0.85)]
 test = stocks[len(train):]
@@ -56,6 +53,10 @@ test = stocks[len(train):]
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
 ##################################
+
+#Will be used to hold values of thetas(theta_knot and theta_1)
+theta = np.zeros(2)
+
 
 #h_theta(x) = theta_0 + theta_1(x_1) AKA y  = b + mx
 def hypothesis_function(t0, t1, x1):
@@ -130,7 +131,72 @@ def compute_gradients_of_loss_function(dataset, theta):
 
     return gradients_of_loss_function
 
-compute_gradients_of_loss_function(train,theta)
+#Equation of Adaptive gradient descent
+#0_t = 0_t-1 - alfa (gradients / sqrt(sum_of_gradients + epsilon) )
+def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 300, e = 1e-8):
+
+    #initliazing empty array to hold loss values
+    loss = []
+    
+    sum_of_squared_gradients = np.zeros(theta.shape[0])
+
+    for t in range(iterations):
+        
+        #computing gradients
+        gradients = compute_gradients_of_loss_function(data, theta)
+    
+        sum_of_squared_gradients += gradients ** 2
+    
+        #add episolon to avoid dividing by zero
+        gradient_over_ss_gradient = gradients / (np.sqrt(sum_of_squared_gradients + e))
+    
+        #updating weights in the function
+        theta = theta - (learning_rate * gradient_over_ss_gradient)
+
+        #keep track of loss
+        loss.append(loss_function(data,theta))
+
+    return loss
+
+#Use to tune the learning rate
+def get_random_learning_rate():
+    learning_rate = 10 ** random.uniform(-6, 1)
+    return learning_rate
+                             
+
+
+
+theta = np.zeros(2)
+
+lr = get_random_learning_rate()
+loss = Adaptive_Gradient_Optimizer(train, theta, lr, 300)
+
+
+plt.plot(loss)
+plt.grid()
+plt.title('AMSGrad')
+plt.xlabel('Training Iterations')
+plt.ylabel('Cost ')
+
+
+#Good - use as parameter learning rate and iterations
+#0.00074307775216506 300
+#0.00047196199034994004 500
+
+
+#(straing line going down 45 angle)
+#3.758255895832423e-08
+#3.758255895832423e-06
+##3.758255895832423e-07
+#5.28215963754875e-06  
+#2.1597591129217853e-06
+#1.8286814084952717e-06
+#2.3077811957482714e-05
+#0.0003929680460792898
+#0.00012880000984335732
+
+#BAD > 0.009
+
 
 
 ##################################
