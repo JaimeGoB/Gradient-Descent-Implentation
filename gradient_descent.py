@@ -22,14 +22,14 @@ stocks.isna().sum()
 
 #Checking if dependent variable has a linear relationship with the attributes.
 sns.set(rc={'figure.figsize':(11.7,8.27)})
-sns.distplot(stocks['ISE(USD)'], bins=30)
+sns.distplot(stocks['ISE(USD)'], bins=30).set_title('Linearity Check')
 plt.show()
 
 #Checking correlation between predictors 
 #We will use Emerging Markets Index.
 correlation_matrix = stocks.corr().round(2)
 #annot = True to print the values inside the square
-sns.heatmap(data=correlation_matrix, annot=True)
+sns.heatmap(data=correlation_matrix, annot=True).set_title('Heat Map')
 
 #In our linear regression model we will use:
 #Emerging-Markets-Index to predict ISE price in USD.
@@ -53,11 +53,7 @@ test = stocks[len(train):]
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
 ##################################
-
-#Will be used to hold values of thetas(theta_knot and theta_1)
 theta = np.zeros(2)
-
-
 
 #h_theta(x) = theta_0 + theta_1(x_1) AKA y  = b + mx
 def hypothesis_function(t0, t1, x1):
@@ -135,11 +131,11 @@ def compute_gradients_of_loss_function(dataset, theta):
         
 #Equation of Adaptive gradient descent
 #0_t = 0_t-1 - alfa (gradients / sqrt(sum_of_gradients + epsilon) )
-def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 300, e = 1e-8):
+def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 1, e = 1e-8):
 
     #initliazing empty array to hold loss values
     loss = []
-    
+
     sum_of_squared_gradients = np.zeros(theta.shape[0])
 
     for t in range(iterations):
@@ -170,52 +166,73 @@ def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 
     
 
     return loss
-
-#Use to tune the learning rate
-def get_random_learning_rate():
-    learning_rate = random.uniform(.0001, .001)
-    return learning_rate
-                    
+                  
 #You want to randmly initialize weights to a value close to zero         
 def random_initialization_thetaas():
    w = np.random.uniform(low=0.00000005, high=0.000001, size=(2,))
    return w 
 
-theta = random_initialization_thetaas()
-lr = get_random_learning_rate()
+################################################
+#Tuning parameters(learning rate, iteration and thetas)
+#to achieve the optimum error value. 
+################################################
 
-loss = Adaptive_Gradient_Optimizer(train, theta, 1e-3, 300)
+log_data = pd.DataFrame(columns = {"lr", "iterations", "weights", "mse"})
+log_data = log_data[["weights", "lr", "iterations", "mse"]]
 
-plt.plot(loss)
-plt.grid()
-plt.title('AMSGrad')
-plt.xlabel('Training Iterations')
-plt.ylabel('Cost ')
+learning_rate_values = [.01, .001, .0001, .00001]
 
+trials_100 = 100
 
-#Best learning rate 0.0005791399329246217 - 0.0009324095198754966
+for j in learning_rate_values:
+    
+    #initializing weights to random values.
+    theta = random_initialization_thetaas()
 
-#Best random theta weights and random learning rate
-#[8.26281591e-07 6.98455793e-07]
-#0.0005914531330325669
+    loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_100)
 
-#[8.28422997e-07 2.73494230e-07]
-#0.0008494101979891405
+    # plt.plot(loss)
+    # plt.grid()
+    # plt.title('AdaGrad')
+    # plt.xlabel('Training Iterations')
+    # plt.ylabel('Cost ')
+    
+    new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
+    log_data = log_data.append(new_row, ignore_index=True)
 
-#[5.90831622e-07 5.35492747e-07]
-#0.0009433691160820722
+trials_250 = 250
 
-#[7.49175543e-07 6.15714291e-07]
-#0.0008999066818002277
+for j in learning_rate_values:
+    
+    #initializing weights to random values.
+    theta = random_initialization_thetaas()
 
-#Does not work
-#[7.92046831e-07 1.55315672e-07]
-#0.00012423721494705947
+    loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_250)
 
+    # plt.plot(loss)
+    # plt.grid()
+    # plt.title('AdaGrad')
+    # plt.xlabel('Training Iterations')
+    # plt.ylabel('Cost ')
+    
+    new_row = {"lr": j, "iterations": trials_250, "weights": theta, "mse":loss}
+    log_data = log_data.append(new_row, ignore_index=True)
+  
+################################################
+#Creating a log file that indicates parameters used 
+#and error/cost for different trials.
+#################################################
+log_data.to_csv('log.txt', mode='w', header=True, sep='\t', index=False)
 
-##################################
+##################################################
 #6. Apply the model to the test part of the dataset.
-##################################
+##################################################
+
+#Get optimal parameters from log data df. 
+optimal_parameters = log_data
+#Dropping MSE and iterations because we only learning rate and weights
+optimal_parameters.drop(['mse'], axis=1, inplace = True)
+optimal_parameters.drop(['iterations'], axis=1, inplace = True)
 
 
 
