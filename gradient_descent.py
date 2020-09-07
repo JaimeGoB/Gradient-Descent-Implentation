@@ -50,6 +50,10 @@ stocks.drop(['EU'], axis=1, inplace = True)
 train = stocks[:int(len(stocks)*0.85)]
 test = stocks[len(train):]
 
+#splitting the test set to apply final model
+x_test = stocks[['Emerging-Markets-Index']]
+y_test = stocks[['ISE(USD)']]
+
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
 ##################################
@@ -196,7 +200,6 @@ for j in learning_rate_values:
     # plt.title('AdaGrad')
     # plt.xlabel('Training Iterations')
     # plt.ylabel('Cost ')
-    
     new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
 
@@ -233,9 +236,27 @@ optimal_parameters = log_data
 #Dropping MSE and iterations because we only learning rate and weights
 optimal_parameters.drop(['mse'], axis=1, inplace = True)
 optimal_parameters.drop(['iterations'], axis=1, inplace = True)
+optimal_parameters.drop(['lr'], axis=1, inplace = True)
 
 
-
+for i, j in optimal_parameters.iterrows(): 
+    
+    #extracting weights array from optimal
+    theta_hypothesis = optimal_parameters.iloc[i, 0]
+    theta_0 = theta_hypothesis[0]
+    theta_1 = theta_hypothesis[1]
+        
+    #iterating through dataset to get all response and predictor variables.
+    for index, row in test.iterrows():
+         
+        #extracting response and predictor from traing set
+        y_test = row[0]
+        x_1 = row[1]
+        
+        #Hypothesis function (predict the value of y (y_hat) )
+        h_0 =hypothesis_function(theta_0, theta_1, x_1)
+        
+    break
 
 
 
