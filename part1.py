@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
 import random
-
+import collections
 
 ##################################
 #3. Data-Preprocessing
@@ -78,7 +78,7 @@ def loss_function(dataset, theta):
     loss = 0
     
     #Will iterate through each point from set provided
-    for index, row in stocks.iterrows():
+    for index, row in dataset.iterrows():
         
         #get x and y from datasets
         x_1 = row['Emerging-Markets-Index']
@@ -111,7 +111,7 @@ def compute_gradients_of_loss_function(dataset, theta):
     theta_1 = theta[1]
         
     #Will iterate through each point from set provided
-    for index, row in stocks.iterrows():
+    for index, row in dataset.iterrows():
         
         #get x and y from datasets
         x_1 = row['Emerging-Markets-Index']
@@ -238,25 +238,54 @@ optimal_parameters.drop(['mse'], axis=1, inplace = True)
 optimal_parameters.drop(['iterations'], axis=1, inplace = True)
 optimal_parameters.drop(['lr'], axis=1, inplace = True)
 
+#creating empty hashmap to store MSE and respective thetas(theta_0 & theta_1)
+cost_test_and_optimal_paramters = {}
 
+#Iterating through all the optimal weights and
+#testing them on the testing set.
+#We will calculate MSE for each set of thetas(theta_0 and theta_1)
+#The MSE will be stored in a dictionary with respective weights/thetas.
 for i, j in optimal_parameters.iterrows(): 
     
-    #extracting weights array from optimal
+    #extracting weights array from optimal parametes df
     theta_hypothesis = optimal_parameters.iloc[i, 0]
-    theta_0 = theta_hypothesis[0]
-    theta_1 = theta_hypothesis[1]
-        
-    #iterating through dataset to get all response and predictor variables.
-    for index, row in test.iterrows():
-         
-        #extracting response and predictor from traing set
-        y_test = row[0]
-        x_1 = row[1]
-        
-        #Hypothesis function (predict the value of y (y_hat) )
-        h_0 =hypothesis_function(theta_0, theta_1, x_1)
-        
-    break
+    
+    #computing mean squared error using optimal parameters and testing dataset
+    test_cost = loss_function(test,theta_hypothesis)
+
+    #updating MSE because we divided by 2 in loss function
+    test_cost = test_cost * 2
+    
+    #convert float to string to store in dictionary and use as key
+    test_cost_string = str(test_cost)
+    
+    #key will be MSE and value will be the respective theta parameters
+    cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
+
+
+
+#sort dictionary to get lowest MSE and their respective weights
+cost_test_and_optimal_paramters = collections.OrderedDict(sorted(cost_test_and_optimal_paramters.items()))
+
+#mse using theta_0 and theta_1
+final_mse = list(cost_test_and_optimal_paramters.keys())[0] 
+  
+#Index 0 - theta_0 (intercept)
+#Index 1 - theta_1 (slope)
+final_thetas = list(cost_test_and_optimal_paramters.values())[0]
+
+
+#Creating strings to output in final model text file
+final_model_equ = "0_hat = 0_o   +  0_1(x_1)"
+final_model = "0_hat = " + str(final_thetas[0]) + " + " + str(final_thetas[1]) + "(x_1)"
+final_model_mse = "MSE: " + str(final_thetas[1])
+
+#writing a file that contains a full equation to the final model with the line 
+#of best fit using the most optomized weights with least MSE.
+with open("final_model.txt", "w") as text_file:
+    text_file.write(final_model_equ + "\n")
+    text_file.write(final_model + "\n")
+    text_file.write(final_model_mse + "\n")
 
 
 
