@@ -6,6 +6,7 @@ import random
 import collections
 import matplotlib.pyplot as plt
 from sklearn import datasets, linear_model
+from sortedcontainers import SortedDict
 
 ##################################
 #3. Data-Preprocessing
@@ -172,7 +173,8 @@ def random_initialization_thetaas():
    w = np.zeros(2)
    w[0] = np.random.normal(0, .0000004, size=(1,))
    w[1] = np.random.normal(0, 1.5, size=(1,))
-   #w = np.random.uniform(low=0.000000009, high=.00001, size=(2,))                  
+   #w[0] = np.random.uniform(low=0.0000009, high=.0001, size=(1,))
+   #w[1] = np.random.uniform(low= - 2.5, high=2.5, size=(1,))
    return w 
 
 def error_difference(dataset, theta):
@@ -221,11 +223,11 @@ for j in learning_rate_values:
 
     loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_100)
 
-    # plt.plot(loss)
-    # plt.grid()
-    # plt.title('AdaGrad')
-    # plt.xlabel('Training Iterations')
-    # plt.ylabel('Cost ')
+    plt.plot(loss)
+    plt.grid()
+    plt.title('AdaGrad')
+    plt.xlabel('Training Iterations')
+    plt.ylabel('Cost ')
     new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
     
@@ -261,11 +263,12 @@ log_data.to_csv('log.txt', mode='w', header=True, sep='\t', index=False)
 ##################################################
 
 #Get optimal parameters from log data df. 
-optimal_parameters = log_data
-#Dropping MSE and iterations because we only learning rate and weights
-optimal_parameters.drop(['mse'], axis=1, inplace = True)
+optimal_parameters = log_data.copy(deep=True)
+#Dropping MSE, lr and iterations because we only need thetas
 optimal_parameters.drop(['iterations'], axis=1, inplace = True)
 optimal_parameters.drop(['lr'], axis=1, inplace = True)
+optimal_parameters.drop(['mse'], axis=1, inplace = True)
+
 
 #creating empty hashmap to store MSE and respective thetas(theta_0 & theta_1)
 cost_test_and_optimal_paramters = {}
@@ -279,27 +282,28 @@ for i, j in optimal_parameters.iterrows():
     #extracting weights array from optimal parametes df
     theta_hypothesis = optimal_parameters.iloc[i, 0]
     
-    test_cost = error_difference(test,theta_hypothesis)
+    ###############################
+    #CHANGED HERE 
+    ###############################
+    #test_cost = error_difference(test,theta_hypothesis)
+    test_cost = loss_function(test,theta_hypothesis)
     
-    break
     # #convert float to string to store in dictionary and use as key
-    # test_cost_string = str(test_cost)
+    test_cost_string = str(test_cost)
     
     # #key will be MSE and value will be the respective theta parameters
-    # cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
-
-test_cost
+    cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
+    ###############################
+    #TO HERE
+    ###############################
 
 #sort dictionary to get lowest MSE and their respective weights
-cost_test_and_optimal_paramters = collections.OrderedDict(sorted(cost_test_and_optimal_paramters.items()))
-
+descending_dict_mse = collections.OrderedDict(sorted(cost_test_and_optimal_paramters.items()))
 #mse using the best theta_0 and theta_1 with less errors
-final_mse = list(cost_test_and_optimal_paramters.keys())[0] 
-  
+final_mse = next(reversed(descending_dict_mse.keys()))
 #Index 0 - theta_0 (intercept)
 #Index 1 - theta_1 (slope)
-final_thetas = list(cost_test_and_optimal_paramters.values())[0]
-
+final_thetas = descending_dict_mse[next(reversed(descending_dict_mse.keys()))]
 
 #writing a file that contains a full equation to the final model with the line 
 #of best fit using the most optomized weights with least MSE.
@@ -314,6 +318,7 @@ with open("final_model.txt", "w") as text_file:
 #We will plot the Adaptive Gradient Descent Model
 #to the financial dataset.
 ###############################
+
 # plotting the points  
 plt.scatter(x_test, y_test)  
 # naming the x axis 
@@ -322,42 +327,17 @@ plt.xlabel('Emerging Markets Index')
 plt.ylabel('ISE Index(USD)') 
 # giving a title to my graph 
 plt.title('Final Model Application on Test Set') 
-#plotting our model
-plt.plot(x_test, final_thetas[1]*x_test + final_thetas[0], color = 'red')
-# function to show the plot 
-plt.show()
-
-
-
-###############################
-#run this
-###############################
-# plotting the points  
-plt.scatter(x_test, y_test)  
-# naming the x axis 
-plt.xlabel('Emerging Markets Index') 
-# naming the y axis 
-plt.ylabel('ISE Index(USD)') 
-# giving a title to my graph 
-plt.title('Final Model Application on Test Set') 
-#This is perfect plot!!!!!!!!! DO NOT TOUCH!!!
-plt.plot(x_test, -7.754878291608648e-06+  1.6143252080243709 * x_test, color = 'blue')
+#This is true intercept from library lm
+#plt.plot(x_test, -7.754878291608648e-06+  1.6143252080243709 * x_test, color = 'blue', label = 'Line of Best Fit.')
 
 #change params on this one
-plt.plot(x_test, -5.325712842992657e-08 +  1.476274575854594 * x_test, color = 'red')
-
+plt.plot(x_test, final_thetas[0] +  final_thetas[1] * x_test, color = 'red', label ='Final Model Approximation.')
+plt.legend(framealpha=1, frameon=True, loc = 'lower right');
 # function to show the plot 
 plt.show()
 
 
 
-###############################
-#CHECK THIS OUT
-###############################
-# Create linear regression object
-regr = linear_model.LinearRegression()
-# Train the model using the training sets
-regr.fit(x_test, y_test)
-print('Coefficients: \n', regr.coef_)
-#This is true intercept: -7.754878291608648e-06
-#This is true slope: 1.41190391
+
+
+
