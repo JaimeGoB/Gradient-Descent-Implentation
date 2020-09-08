@@ -5,8 +5,6 @@ import seaborn as sns
 import random
 import collections
 import matplotlib.pyplot as plt
-from sklearn import datasets, linear_model
-from sortedcontainers import SortedDict
 
 ##################################
 #3. Data-Preprocessing
@@ -214,7 +212,10 @@ log_data = log_data[["weights", "lr", "iterations", "mse"]]
 
 learning_rate_values = [.01, .001, .0001, .00001]
 
+
 trials_100 = 100
+
+
 
 for j in learning_rate_values:
     
@@ -223,14 +224,17 @@ for j in learning_rate_values:
 
     loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_100)
 
+    plt.figure()
     plt.plot(loss)
-    plt.grid()
     plt.title('AdaGrad')
     plt.xlabel('Training Iterations')
     plt.ylabel('Cost ')
+    plt.show()
+    
     new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
     
+
 print(log_data)
 
 trials_250 = 250
@@ -242,11 +246,12 @@ for j in learning_rate_values:
 
     loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_250)
 
-    # plt.plot(loss)
-    # plt.grid()
-    # plt.title('AdaGrad')
-    # plt.xlabel('Training Iterations')
-    # plt.ylabel('Cost ')
+    plt.figure()
+    plt.plot(loss)
+    plt.title('AdaGrad')
+    plt.xlabel('Training Iterations')
+    plt.ylabel('Cost ')
+    plt.show()
     
     new_row = {"lr": j, "iterations": trials_250, "weights": theta, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
@@ -329,7 +334,6 @@ plt.ylabel('ISE Index(USD)')
 plt.title('Final Model Application on Test Set') 
 #This is true intercept from library lm
 #plt.plot(x_test, -7.754878291608648e-06+  1.6143252080243709 * x_test, color = 'blue', label = 'Line of Best Fit.')
-
 #change params on this one
 plt.plot(x_test, final_thetas[0] +  final_thetas[1] * x_test, color = 'red', label ='Final Model Approximation.')
 plt.legend(framealpha=1, frameon=True, loc = 'lower right');
