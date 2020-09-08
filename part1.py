@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 import random
 import collections
+import matplotlib.pyplot as plt
+from sklearn import datasets, linear_model
 
 ##################################
 #3. Data-Preprocessing
@@ -89,7 +91,7 @@ def loss_function(dataset, theta):
         h_0 =hypothesis_function(theta_0, theta_1, x_1)
         
         #Sum of loss (sum of squared error) - PART2 Equation
-        loss = loss + ((h_0 - y) ** 2)
+        loss = loss + ((y - h_0) ** 2)
         
     #mean sqaured error - dividing sum by n observations - PART1 Equation
     mean_squared_error = loss / (2 * n)
@@ -122,9 +124,9 @@ def compute_gradients_of_loss_function(dataset, theta):
         h_0 =hypothesis_function(theta_0, theta_1, x_1)
         
         
-        gradients_of_loss_function[0] += - (2 / n)  * ( y - h_0 )
+        gradients_of_loss_function[0] += - (1 / n)  * ( y - h_0 )
         
-        gradients_of_loss_function[1] += - (2 / n) * x_1 * ( y - h_0 )
+        gradients_of_loss_function[1] += - (1 / n) * x_1 * ( y - h_0 )
     
     
     epsilon = 1e-8
@@ -135,7 +137,7 @@ def compute_gradients_of_loss_function(dataset, theta):
         
 #Equation of Adaptive gradient descent
 #0_t = 0_t-1 - alfa (gradients / sqrt(sum_of_gradients + epsilon) )
-def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 1, e = 1e-8):
+def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 100, e = 1e-8):
 
     #initliazing empty array to hold loss values
     loss = []
@@ -148,21 +150,14 @@ def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 
         gradients = compute_gradients_of_loss_function(data, theta)
     
         sum_of_squared_gradients += gradients ** 2
-    
         #add episolon to avoid dividing by zero
         gradient_over_ss_gradient = gradients / (np.sqrt(sum_of_squared_gradients + e))
     
         #updating weights in the function
         theta = theta - (learning_rate * gradient_over_ss_gradient)
-
+                
         #keep track of loss
         cost = loss_function(data,theta)
-        
-        #stopping condition
-        if len(loss) > 0:
-            #check if cost is increasing
-            if loss[-1] < cost:
-                break 
             
         #add error ONLY IFF IT is decreasing
         loss.append(cost)
@@ -170,17 +165,48 @@ def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 
     
 
     return loss
-                  
+
+#w = np.random.uniform(low=0.00000005, high=0.000001, size=(2,))                  
 #You want to randmly initialize weights to a value close to zero         
 def random_initialization_thetaas():
-   w = np.random.uniform(low=0.00000005, high=0.000001, size=(2,))
+   w = np.zeros(2)
+   w[0] = np.random.normal(0, .0000004, size=(1,))
+   w[1] = np.random.normal(0, 1.5, size=(1,))
+   #w = np.random.uniform(low=0.000000009, high=.00001, size=(2,))                  
    return w 
+
+def error_difference(dataset, theta):
+    
+    #get m and b(intercept b and slope m)
+    theta_0 = theta[0]
+    theta_1 = theta[1]
+    
+    error_diff = []
+    
+    #Will iterate through each point from set provided
+    for index, row in dataset.iterrows():
+        
+        #get x and y from datasets
+        x_1 = row['Emerging-Markets-Index']
+        #y actual
+        y = row['ISE(USD)']
+        
+        #Hypothesis function (predict the value of y (y_hat) )
+        h_0 =hypothesis_function(theta_0, theta_1, x_1)
+        
+        error_diff.append(h_0 - y)
+        
+    return error_diff
 
 ################################################
 #Tuning parameters(learning rate, iteration and thetas)
 #to achieve the optimum error value. 
 ################################################
 
+
+###############################
+#run this
+###############################
 log_data = pd.DataFrame(columns = {"lr", "iterations", "weights", "mse"})
 log_data = log_data[["weights", "lr", "iterations", "mse"]]
 
@@ -202,6 +228,8 @@ for j in learning_rate_values:
     # plt.ylabel('Cost ')
     new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
+    
+print(log_data)
 
 trials_250 = 250
 
@@ -220,7 +248,8 @@ for j in learning_rate_values:
     
     new_row = {"lr": j, "iterations": trials_250, "weights": theta, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
-  
+
+print(log_data)
 ################################################
 #Creating a log file that indicates parameters used 
 #and error/cost for different trials.
@@ -250,24 +279,21 @@ for i, j in optimal_parameters.iterrows():
     #extracting weights array from optimal parametes df
     theta_hypothesis = optimal_parameters.iloc[i, 0]
     
-    #computing mean squared error using optimal parameters and testing dataset
-    test_cost = loss_function(test,theta_hypothesis)
-
-    #updating MSE because we divided by 2 in loss function
-    test_cost = test_cost * 2
+    test_cost = error_difference(test,theta_hypothesis)
     
-    #convert float to string to store in dictionary and use as key
-    test_cost_string = str(test_cost)
+    break
+    # #convert float to string to store in dictionary and use as key
+    # test_cost_string = str(test_cost)
     
-    #key will be MSE and value will be the respective theta parameters
-    cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
+    # #key will be MSE and value will be the respective theta parameters
+    # cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
 
-
+test_cost
 
 #sort dictionary to get lowest MSE and their respective weights
 cost_test_and_optimal_paramters = collections.OrderedDict(sorted(cost_test_and_optimal_paramters.items()))
 
-#mse using theta_0 and theta_1
+#mse using the best theta_0 and theta_1 with less errors
 final_mse = list(cost_test_and_optimal_paramters.keys())[0] 
   
 #Index 0 - theta_0 (intercept)
@@ -275,17 +301,63 @@ final_mse = list(cost_test_and_optimal_paramters.keys())[0]
 final_thetas = list(cost_test_and_optimal_paramters.values())[0]
 
 
-#Creating strings to output in final model text file
-final_model_equ = "0_hat = 0_o   +  0_1(x_1)"
-final_model = "0_hat = " + str(final_thetas[0]) + " + " + str(final_thetas[1]) + "(x_1)"
-final_model_mse = "MSE: " + str(final_thetas[1])
-
 #writing a file that contains a full equation to the final model with the line 
 #of best fit using the most optomized weights with least MSE.
 with open("final_model.txt", "w") as text_file:
-    text_file.write(final_model_equ + "\n")
-    text_file.write(final_model + "\n")
-    text_file.write(final_model_mse + "\n")
+    text_file.write("0_hat = 0_o   +  0_1(x_1) \n")
+    text_file.write("0_hat = " + str(final_thetas[0]) + " + " + str(final_thetas[1]) + "(x_1)\n")
+    text_file.write("MSE: " + final_mse + "\n")
 
 
 
+###############################
+#We will plot the Adaptive Gradient Descent Model
+#to the financial dataset.
+###############################
+# plotting the points  
+plt.scatter(x_test, y_test)  
+# naming the x axis 
+plt.xlabel('Emerging Markets Index') 
+# naming the y axis 
+plt.ylabel('ISE Index(USD)') 
+# giving a title to my graph 
+plt.title('Final Model Application on Test Set') 
+#plotting our model
+plt.plot(x_test, final_thetas[1]*x_test + final_thetas[0], color = 'red')
+# function to show the plot 
+plt.show()
+
+
+
+###############################
+#run this
+###############################
+# plotting the points  
+plt.scatter(x_test, y_test)  
+# naming the x axis 
+plt.xlabel('Emerging Markets Index') 
+# naming the y axis 
+plt.ylabel('ISE Index(USD)') 
+# giving a title to my graph 
+plt.title('Final Model Application on Test Set') 
+#This is perfect plot!!!!!!!!! DO NOT TOUCH!!!
+plt.plot(x_test, -7.754878291608648e-06+  1.6143252080243709 * x_test, color = 'blue')
+
+#change params on this one
+plt.plot(x_test, -5.325712842992657e-08 +  1.476274575854594 * x_test, color = 'red')
+
+# function to show the plot 
+plt.show()
+
+
+
+###############################
+#CHECK THIS OUT
+###############################
+# Create linear regression object
+regr = linear_model.LinearRegression()
+# Train the model using the training sets
+regr.fit(x_test, y_test)
+print('Coefficients: \n', regr.coef_)
+#This is true intercept: -7.754878291608648e-06
+#This is true slope: 1.41190391
