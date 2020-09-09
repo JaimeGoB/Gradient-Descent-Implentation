@@ -5,6 +5,9 @@ import seaborn as sns
 import random
 import collections
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
+from sklearn.linear_model import LinearRegression
+
 
 ##################################
 #3. Data-Preprocessing
@@ -42,6 +45,18 @@ stocks.drop(['FTSE'], axis=1, inplace = True)
 stocks.drop(['NIKKEI'], axis=1, inplace = True)
 stocks.drop(['BOVESPA'], axis=1, inplace = True)
 stocks.drop(['EU'], axis=1, inplace = True)
+
+###################
+#Normalizing dataset
+###################
+#Scaling only x_1
+#s = preprocessing.scale(stocks["ISE(USD)"])
+#stocks["ISE(USD)"] = s
+
+#Scaling entire dataset
+preprocessing.scale(stocks)
+
+
 
 ##################################
 #4. Spliting the dataset into training and test parts. 
@@ -169,10 +184,8 @@ def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 
 #You want to randmly initialize weights to a value close to zero         
 def random_initialization_thetaas():
    w = np.zeros(2)
-   w[0] = np.random.normal(0, .0000004, size=(1,))
-   w[1] = np.random.normal(0, 1.5, size=(1,))
-   #w[0] = np.random.uniform(low=0.0000009, high=.0001, size=(1,))
-   #w[1] = np.random.uniform(low= - 2.5, high=2.5, size=(1,))
+   w[0] = np.random.normal(-.06, .10, size=(1,))
+   w[1] = np.random.normal(66, 1, size=(1,))
    return w 
 
 def error_difference(dataset, theta):
@@ -210,7 +223,7 @@ def error_difference(dataset, theta):
 log_data = pd.DataFrame(columns = {"lr", "iterations", "weights", "mse"})
 log_data = log_data[["weights", "lr", "iterations", "mse"]]
 
-learning_rate_values = [.01, .001, .0001, .00001]
+learning_rate_values = [.01, .001, .0001]
 
 
 trials_100 = 100
@@ -332,16 +345,11 @@ plt.xlabel('Emerging Markets Index')
 plt.ylabel('ISE Index(USD)') 
 # giving a title to my graph 
 plt.title('Final Model Application on Test Set') 
-#This is true intercept from library lm
-#plt.plot(x_test, -7.754878291608648e-06+  1.6143252080243709 * x_test, color = 'blue', label = 'Line of Best Fit.')
 #change params on this one
 plt.plot(x_test, final_thetas[0] +  final_thetas[1] * x_test, color = 'red', label ='Final Model Approximation.')
 plt.legend(framealpha=1, frameon=True, loc = 'lower right');
 # function to show the plot 
 plt.show()
-
-
-
 
 
 
