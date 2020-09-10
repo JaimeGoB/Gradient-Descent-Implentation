@@ -21,6 +21,14 @@ stocks = pd.read_csv(url)
 stocks.rename(columns={"ISE.1": "ISE(USD)"}, inplace =True)
 stocks.rename(columns={"EM": "Emerging-Markets-Index"}, inplace =True)
 
+#Droping ISE because we are interested in ISE(USD)
+stocks.drop(['ISE'], axis=1, inplace = True)
+stocks.drop(['date'], axis=1, inplace = True)
+stocks.drop(['SP'], axis=1, inplace = True)
+stocks.drop(['NIKKEI'], axis=1, inplace = True)
+stocks.drop(['BOVESPA'], axis=1, inplace = True)
+
+
 #checking for missing values or NaN
 stocks.isna().sum()
 
@@ -35,35 +43,25 @@ correlation_matrix = stocks.corr().round(2)
 #annot = True to print the values inside the square
 sns.heatmap(data=correlation_matrix, annot=True).set_title('Heat Map')
 
-#In our linear regression model we will use:
-#Emerging-Markets-Index to predict ISE price in USD.
-stocks.drop(['ISE'], axis=1, inplace = True)
-stocks.drop(['date'], axis=1, inplace = True)
-stocks.drop(['SP'], axis=1, inplace = True)
-stocks.drop(['DAX'], axis=1, inplace = True)
-stocks.drop(['FTSE'], axis=1, inplace = True)
-stocks.drop(['NIKKEI'], axis=1, inplace = True)
-stocks.drop(['BOVESPA'], axis=1, inplace = True)
-stocks.drop(['EU'], axis=1, inplace = True)
 
 ###################
 #Normalizing dataset
 ###################
-#Scaling only x_1
-#s = preprocessing.scale(stocks["ISE(USD)"])
-#stocks["ISE(USD)"] = s
-
-#Scaling entire dataset
-preprocessing.scale(stocks)
-
-
+x_1 = preprocessing.scale(stocks["DAX"])
+stocks["DAX"] = x_1
+x_2 = preprocessing.scale(stocks["FTSE"])
+stocks["FTSE"] = x_2
+x_3 = preprocessing.scale(stocks["EU"])
+stocks["EU"] = x_3
+x_4 = preprocessing.scale(stocks["Emerging-Markets-Index"])
+stocks["Emerging-Markets-Index"] = x_4
 
 ##################################
 #4. Spliting the dataset into training and test parts. 
 ##################################
 
 #Splitting datasets in training and test
-train = stocks[:int(len(stocks)*0.85)]
+train = stocks[:int(len(stocks)*0.80)]
 test = stocks[len(train):]
 
 #splitting the test set to apply final model
@@ -73,44 +71,52 @@ y_test = stocks[['ISE(USD)']]
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
 ##################################
-theta = np.zeros(2)
 
-#h_theta(x) = theta_0 + theta_1(x_1) AKA y  = b + mx
-def hypothesis_function(t0, t1, x1):
-    return (t0 + t1 * x1)
+#h_theta(x) = theta_0 + theta_1(x_1)T AKA y  = b + mx(T)
+def hypothesis_function(t0, theta, dataset):
+  #1 X p
+  theta_sub_i_vector = theta
+  #p X N
+  x_sub_i_vectors = dataset.loc[:, ~stocks.columns.isin(['ISE(USD)'])]
+  x_sub_i_vectors = x_sub_i_vectors.to_numpy()
+  x_sub_i_vectors = np.transpose(x_sub_i_vectors)
+
+  # 1 x 4 dot 4 x N
+  #return 1 X N
+  return (t0 + np.dot(theta_sub_i_vector, x_sub_i_vectors))
 
 #Equation:
 #J = (1/2n) * sum( h - y )^ 2
 #    PART1        PART2
-def loss_function(dataset, theta):
+def loss_function(intercept, theta, dataset):
 
     #getting number of observations
     n = float(len(dataset))
+    #getting y_actual matrix
+    y = dataset['ISE(USD)']
+    y = y.to_numpy()
     
-    #get m and b(intercept b and slope m)
-    theta_0 = theta[0]
-    theta_1 = theta[1]
+    #Hypothesis function (predict the value of y (y_hat) )
+    h_0 =hypothesis_function(intercept, theta, dataset)
+
+    #Sum of loss (sum of squared error) - PART2 Equation
+    error_difference = np.subtract(y, h_0)    
+    error_difference = np.square(error_difference)
+    sum_squared_error = np.sum(error_difference)
     
-    loss = 0
-    
-    #Will iterate through each point from set provided
-    for index, row in dataset.iterrows():
-        
-        #get x and y from datasets
-        x_1 = row['Emerging-Markets-Index']
-        #y actual
-        y = row['ISE(USD)']
-        
-        #Hypothesis function (predict the value of y (y_hat) )
-        h_0 =hypothesis_function(theta_0, theta_1, x_1)
-        
-        #Sum of loss (sum of squared error) - PART2 Equation
-        loss = loss + ((y - h_0) ** 2)
-        
     #mean sqaured error - dividing sum by n observations - PART1 Equation
-    mean_squared_error = loss / (2 * n)
+    mean_squared_error = sum_squared_error / (2 * n)
         
+    #return mean_squared_error
     return mean_squared_error
+
+theta = [1 , 1, 1, 1]
+
+intercept = 10
+
+test = loss_function(intercept, theta, train)
+test
+
 
 #The objective is to minimize loss (error).
 #This can be done by calculating the gradient of the loss function.
@@ -180,60 +186,42 @@ def Adaptive_Gradient_Optimizer(data, theta, learning_rate = 1e-2, iterations = 
 
     return loss
 
-#w = np.random.uniform(low=0.00000005, high=0.000001, size=(2,))                  
 #You want to randmly initialize weights to a value close to zero         
-def random_initialization_thetaas():
-   w = np.zeros(2)
-   w[0] = np.random.normal(-.06, .10, size=(1,))
-   w[1] = np.random.normal(66, 1, size=(1,))
-   return w 
+def random_initialization_thetas():
+   
+   #Creting random theta_0 (intercept) 
+   intercept = np.random.normal(66, 1, size=(1,))
+   
+   #Creating 1 x p of random thetas(weights)
+   t = np.zeros(2)
+   t[0] = np.random.normal(-.06, .10, size=(1,))
+   t[1] = np.random.normal(66, 1, size=(1,))
+   t[2] = np.random.normal(-.06, .10, size=(1,))
+   t[3] = np.random.normal(66, 1, size=(1,))
+   
+   return (intercept, t)
 
-def error_difference(dataset, theta):
-    
-    #get m and b(intercept b and slope m)
-    theta_0 = theta[0]
-    theta_1 = theta[1]
-    
-    error_diff = []
-    
-    #Will iterate through each point from set provided
-    for index, row in dataset.iterrows():
-        
-        #get x and y from datasets
-        x_1 = row['Emerging-Markets-Index']
-        #y actual
-        y = row['ISE(USD)']
-        
-        #Hypothesis function (predict the value of y (y_hat) )
-        h_0 =hypothesis_function(theta_0, theta_1, x_1)
-        
-        error_diff.append(h_0 - y)
-        
-    return error_diff
 
 ################################################
 #Tuning parameters(learning rate, iteration and thetas)
 #to achieve the optimum error value. 
 ################################################
 
-
-###############################
-#run this
-###############################
 log_data = pd.DataFrame(columns = {"lr", "iterations", "weights", "mse"})
 log_data = log_data[["weights", "lr", "iterations", "mse"]]
 
-learning_rate_values = [.01, .001, .0001]
+#learning_rate_values = [.01, .001, .0001]
+learning_rate_values = [.01]
 
-
-trials_100 = 100
+#Change this
+trials_100 = 50
 
 
 
 for j in learning_rate_values:
     
     #initializing weights to random values.
-    theta = random_initialization_thetaas()
+    intercept, theta = random_initialization_thetas()
 
     loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_100)
 
@@ -255,7 +243,7 @@ trials_250 = 250
 for j in learning_rate_values:
     
     #initializing weights to random values.
-    theta = random_initialization_thetaas()
+    intercept, theta = random_initialization_thetas()
 
     loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_250)
 
@@ -300,10 +288,6 @@ for i, j in optimal_parameters.iterrows():
     #extracting weights array from optimal parametes df
     theta_hypothesis = optimal_parameters.iloc[i, 0]
     
-    ###############################
-    #CHANGED HERE 
-    ###############################
-    #test_cost = error_difference(test,theta_hypothesis)
     test_cost = loss_function(test,theta_hypothesis)
     
     # #convert float to string to store in dictionary and use as key
@@ -311,9 +295,7 @@ for i, j in optimal_parameters.iterrows():
     
     # #key will be MSE and value will be the respective theta parameters
     cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
-    ###############################
-    #TO HERE
-    ###############################
+
 
 #sort dictionary to get lowest MSE and their respective weights
 descending_dict_mse = collections.OrderedDict(sorted(cost_test_and_optimal_paramters.items()))
