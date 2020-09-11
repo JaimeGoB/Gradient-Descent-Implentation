@@ -7,6 +7,8 @@ import collections
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
 
 
 ##################################
@@ -43,7 +45,6 @@ correlation_matrix = stocks.corr().round(2)
 #annot = True to print the values inside the square
 sns.heatmap(data=correlation_matrix, annot=True).set_title('Heat Map')
 
-
 ###################
 #Normalizing dataset
 ###################
@@ -61,273 +62,166 @@ stocks["Emerging-Markets-Index"] = x_4
 ##################################
 
 #Splitting datasets in training and test
-train = stocks[:int(len(stocks)*0.80)]
-test = stocks[len(train):]
+X = stocks[['DAX','FTSE','EU','Emerging-Markets-Index']]
+intercept = np.ones(len(X))
+X.insert (0, 'intercetp', intercept)
 
-#splitting the test set to apply final model
-x_test = stocks[['Emerging-Markets-Index']]
-y_test = stocks[['ISE(USD)']]
+Y = stocks[['ISE(USD)']]
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=.2, random_state=101)
+
 
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
 ##################################
 
-#h_theta(x) = theta_0 + theta_1(x_1)T AKA y  = b + mx(T)
-def hypothesis_function(dataset, theta):
-  #getting intercept
-  t0 = theta[0]
-  
-  #getting theta1...theta4
-  #1 X p
-  theta_sub_i_vector = np.array([theta[1:] ])
-  
-  #p X N
-  x_sub_i_vectors = dataset.loc[:, ~dataset.columns.isin(['ISE(USD)'])]
-  x_sub_i_vectors = x_sub_i_vectors.to_numpy()
-  x_sub_i_vectors = np.transpose(x_sub_i_vectors)
+#h_theta(x) = theta_0 + theta(x)T AKA y  = b + mx(T)
+def hypothesis_function(X, thetas):
+    return (X.dot(thetas))
+    
+# error = (h_0) - (y_actual)
+def compute_error_difference(h_0, Y):
+    return (np.subtract(h_0, Y))
 
-  # 1 x 4 dot 4 x N
-  #[1 X 428]
-  return (t0 + np.dot(theta_sub_i_vector, x_sub_i_vectors))
-
-theta = [1 , 1, 1, 1, 1]
-test_hypothesis = hypothesis_function(train, theta)
-test_hypothesis.shape #1 x 428
+#updating gradients from all predictor variables
+def update_gradients(error_difference, X):
+    return (error_difference.T.dot(X))
 
 #Equation:
 #J = (1/2n) * sum( h - y )^ 2
 #    PART1        PART2
-def loss_function(dataset, theta):
+def loss_function(X, Y, thetas):
 
     #getting number of observations
-    n = float(len(dataset))
+    n = float(len(X))
     
-    #getting y_actual matrix 
-    #[1 X 428]
-    y = dataset['ISE(USD)']
-    y = np.array([y])
-
     #Hypothesis function (predict the value of y (y_hat) ) 
     #[1 X 428]
-    h_0 =hypothesis_function(dataset, theta)
+    h_0 =hypothesis_function(X, thetas)
 
     #Sum of loss (sum of squared error) - PART2 Equation 
     #[1 X 428]
-    error_difference = np.subtract(y, h_0)    
-    #[1 X 428]
-    error_difference = np.square(error_difference)
+    error_difference = compute_error_difference(h_0, Y)
+    
     # #Sum all errors from vector 
     # #[1 X 1]
-    sum_squared_error = np.sum(error_difference)
+    sum_squared_error = np.sum(np.square(error_difference))
+    
     #mean sqaured error - dividing sum by n observations - PART1 Equation 
     #[1 X 1]
-    mean_squared_error = sum_squared_error / (2 * n)
+    mean_squared_error = sum_squared_error / (n)
         
-    # #[1 X 1]
-    return mean_squared_error
+    #[1 X 1]
+    return (mean_squared_error)
 
-theta = [1 , 1, 1, 1, 1]
-test_loss = loss_function(train, theta)
-test_loss
+#You want to randmly initialize weights to a value close to zero         
+def random_initialization_thetas():
+   #Creating 1 x p of random thetas(weights)
+   return [np.random.normal(0, 0.01, (5,1))]
 
-#The objective is to minimize loss (error).
-#This can be done by calculating the gradient of the loss function.
-def compute_gradients_of_loss_function(dataset, theta):
 
-    #initializing the gradients to zero
-    #[5 X 1]
-    gradients_of_loss_function = np.zeros(5)
-    
+def Adaptive_Gradient_Descent(X, Y, thetas, learning_rate = 1e-2, iterations = 3, eps = 1e-6):
+
     #getting number of observations
-    n = float(len(dataset))
-
-    #getting y_actual matrix 
-    #[1 X 428]
-    y = dataset['ISE(USD)']
-    y = np.array([y])
+    n = float(len(X))
     
-    #predictor variables 
-    #[1 X 428]
-    x_1 = dataset['DAX']
-    x_1 = np.array([x_1])
-    x_2 = dataset['FTSE']
-    x_2 = np.array([x_2])
-    x_3 = dataset['EU']
-    x_3 = np.array([x_3])
-    x_4 = dataset['Emerging-Markets-Index']
-    x_4 = np.array([x_4])
-
-        
-    #Hypothesis function (predict the value of y (y_hat) ) 
-    #[1 X 428]
-    h_0 =hypothesis_function(dataset, theta)
-        
-    #[1 X 428]
-    cost = np.subtract(y, h_0)
-    
-    #[1 X 1] 
-    gradients_of_loss_function[0] = np.multiply( (-1 / n), np.sum( cost) )
-    #[1 X 1] 
-    gradients_of_loss_function[1] = np.multiply( (-1 / n), np.sum( np.multiply( x_1, np.transpose(cost) ) ) )
-    #[1 X 1] 
-    gradients_of_loss_function[2] = np.multiply( (-1 / n), np.sum( np.multiply( x_2, np.transpose(cost) ) ) )
-    #[1 X 1] 
-    gradients_of_loss_function[3] = np.multiply( (-1 / n), np.sum( np.multiply( x_3, np.transpose(cost) ) ) )
-    #[1 X 1] 
-    gradients_of_loss_function[4] = np.multiply( (-1 / n), np.sum( np.multiply( x_4, np.transpose(cost) ) ) )
-        
-    #add episolon to avoid division by zero
-    epsilon = 1e-8
-    #[5 X 1]
-    gradients_of_loss_function = np.divide(gradients_of_loss_function, (n + epsilon) )
-
-    #[5 X 1] all thetas including intercept (intercept + predictors X 1 row)
-    return gradients_of_loss_function
-
-
-theta = [1 , 1, 1, 1, 1]
-test_compute = compute_gradients_of_loss_function(train, theta)
-test_compute
-
-#Equation of Adaptive gradient descent
-#0_t = 0_t-1 - alfa (gradients / sqrt(sum_of_gradients + epsilon) )
-def Adaptive_Gradient_Optimizer(dataset, theta, learning_rate = 1e-2, iterations = 3, e = 1e-8):
-
+    #initliazing empty dataframe for sum of gradient sqr
+    Sum_Gradient_Squared = 0
     #initliazing empty array to hold loss values
-    loss = []
-
-    sum_of_squared_gradients = np.zeros(1)
-
-    for t in range(iterations):
-        #computing gradients
-        #[5]
-        gradients = compute_gradients_of_loss_function(dataset, theta)
+    total_cost = []
     
-        #square gradients and then add all gradient
-        #[1 X 1]
-        sum_of_squared_gradients = np.sum( np.square(gradients))
+    for iteration in range(iterations):
         
-        #add episolon to avoid dividing by zero
-        gradient_over_ss_gradient = gradients / (np.sqrt(sum_of_squared_gradients + e))
+        for thetas_update in thetas:
+            #[428 X 1] - hypothesis function
+            h_0 = hypothesis_function(X, thetas_update)
+            #[428 X 1] - cost function
+            error_difference = compute_error_difference(h_0, Y)
+            #[1 X 5] - compute gradient function
+            gradients = update_gradients(error_difference, X)
+            #Squaring all gradients of weights and adding them together
+            #[5 X 1]
+            Sum_Gradient_Squared += (gradients.T ** 2)
+            #Update thetas
+            #[5 x 1]
+            thetas_update[:] -=  1/len(X) * gradients.T * ((learning_rate / np.sqrt(Sum_Gradient_Squared + eps)))
+            
+            #keep track of loss to plot cost vs iterations
+            cost = loss_function(X, Y, thetas_update)
+            total_cost.append(cost)
         
-        #updating weights in the function
-        theta = theta - (learning_rate * gradient_over_ss_gradient)
-              
-        #keep track of loss
-        cost = loss_function(dataset, theta)
-        loss.append(cost)
-
-    #[iterations X 1]
-    return loss
-
-theta = [1 , 1, 1, 1, 1]
-test_loss = Adaptive_Gradient_Optimizer(train, theta)
-test_loss
-
+    return (thetas_update, total_cost)
+    
 ################################################
 #Tuning parameters(learning rate, iteration and thetas)
 #to achieve the optimum error value. 
 ################################################
-#You want to randmly initialize weights to a value close to zero         
-def random_initialization_thetas():
 
-   #Creating 1 x p of random thetas(weights)
-   t = np.zeros(5)
-   t[0] = np.random.normal(-0.22728302, .1, size=(1,))
-   t[1] = np.random.normal(0.15509949, .1, size=(1,))
-   t[2] = np.random.normal(-0.35449038, .1, size=(1,))
-   t[3] = np.random.normal(0.48699315, .1, size=(1,))
-   t[4] = np.random.normal(-0.11458056, .1, size=(1,))
-
-   return t
-
+#Creating df to hold optimal values
 log_data = pd.DataFrame(columns = {"lr", "iterations", "weights", "mse"})
+#arranging in this specic order
 log_data = log_data[["weights", "lr", "iterations", "mse"]]
+
 learning_rate_values = [.01, .001, .0001]
 
 trials_100 = 100
-for j in learning_rate_values:
+for lr in learning_rate_values:
     
     #initializing weights to random values.
-    theta = random_initialization_thetas()
-
-    loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_100)
-
-    # plt.figure()
-    # plt.plot(loss)
-    # plt.title('AdaGrad')
-    # plt.xlabel('Training Iterations')
-    # plt.ylabel('Cost ')
-    # plt.show()
+    random_thetas = random_initialization_thetas()
+    fitted_thetas, loss = Adaptive_Gradient_Descent(X_train, Y_train, random_thetas, lr, trials_100)
     
-    new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
+    #plotting cost vs iterations
+    plt.figure()
+    plt.plot(loss)
+    plt.title('AdaGrad')
+    plt.xlabel('Training Iterations')
+    plt.ylabel('Cost ')
+    plt.show()
+    
+    #adding information about iterations, thetas and mse to log file
+    new_row = {"lr": lr, "iterations": trials_100, "weights": fitted_thetas, "mse":loss}
     log_data = log_data.append(new_row, ignore_index=True)
     
-#print(log_data)
 
-
-trials_250 = 250
-for j in learning_rate_values:
-    
-    #initializing weights to random values.
-    theta = random_initialization_thetas()
-
-    loss = Adaptive_Gradient_Optimizer(train, theta, j, trials_250)
-
-    # plt.figure()
-    # plt.plot(loss)
-    # plt.title('AdaGrad')
-    # plt.xlabel('Training Iterations')
-    # plt.ylabel('Cost ')
-    # plt.show()
-    
-    new_row = {"lr": j, "iterations": trials_100, "weights": theta, "mse":loss}
-    log_data = log_data.append(new_row, ignore_index=True)
-    
-#print(log_data)
 ################################################
 #Creating a log file that indicates parameters used 
 #and error/cost for different trials.
 #################################################
-log_data.to_csv('log.txt', mode='w', header=True, sep='\t', index=False)
+log_file = open("log.txt", "w")
+log_file.write(log_data.to_string())
+log_file.close()
 
 ##################################################
 #6. Apply the model to the test part of the dataset.
 ##################################################
 
-#Get optimal parameters from log data df. 
-optimal_parameters = log_data.copy(deep=True)
-#Dropping MSE, lr and iterations because we only need thetas
-optimal_parameters.drop(['iterations'], axis=1, inplace = True)
-optimal_parameters.drop(['lr'], axis=1, inplace = True)
-optimal_parameters.drop(['mse'], axis=1, inplace = True)
+#Get optimal weights from log data df. 
+optimal_thetas = log_data[["weights"]]
 
 
 #creating empty hashmap to store MSE and respective thetas(theta_0 & theta_1)
-cost_test_and_optimal_paramters = {}
+test_cost_and_optimal_paramters = {}
 
 #Iterating through all the optimal weights and
 #testing them on the testing set.
 #We will calculate MSE for each set of thetas(theta_0 and theta_1)
 #The MSE will be stored in a dictionary with respective weights/thetas.
-for i, j in optimal_parameters.iterrows(): 
+for i, j in optimal_thetas.iterrows(): 
     
     #extracting weights array from optimal parametes df
-    theta_hypothesis = optimal_parameters.iloc[i, 0]
-    
-    test_cost = loss_function(test,theta_hypothesis)
-    print(theta_hypothesis)
-    print(test_cost)
-    print("")
+    test_weights = optimal_thetas.iloc[i, 0]
+    #MSE from these weights on the test set
+    test_cost = float(loss_function(X_test, Y_test,test_weights))
+
     # #convert float to string to store in dictionary and use as key
     test_cost_string = str(test_cost)
     
     # #key will be MSE and value will be the respective theta parameters
-    cost_test_and_optimal_paramters.update({test_cost_string: theta_hypothesis})
+    test_cost_and_optimal_paramters.update({test_cost_string: test_weights})
 
 
 #sort dictionary to get lowest MSE and their respective weights
-descending_dict_mse = collections.OrderedDict(sorted(cost_test_and_optimal_paramters.items()))
+descending_dict_mse = collections.OrderedDict(sorted(test_cost_and_optimal_paramters.items()))
 #mse using the best theta_0 and theta_1 with less errors
 final_mse = next(iter(descending_dict_mse))
 #Index 0 - theta_0 (intercept)
@@ -335,42 +229,30 @@ final_mse = next(iter(descending_dict_mse))
 final_thetas = descending_dict_mse[final_mse]
 
 
-
-###############################
-#Do not run after here.
-###############################
-
-
-###############################
-#change this to add more variables
 ###############################
 #writing a file that contains a full equation to the final model with the line 
 #of best fit using the most optomized weights with least MSE.
-with open("final_model.txt", "w") as text_file:
-    text_file.write("0_hat = 0_o   +  0_1(x_1) \n")
-    text_file.write("0_hat = " + str(final_thetas[0]) + " + " + str(final_thetas[1]) + "(x_1)\n")
-    text_file.write("MSE: " + final_mse + "\n")
-
-
-
-###############################
-#We will plot the Adaptive Gradient Descent Model
-#to the financial dataset.
 ###############################
 
-# plotting the points  
-plt.scatter(x_test, y_test)  
-# naming the x axis 
-plt.xlabel('Emerging Markets Index') 
-# naming the y axis 
-plt.ylabel('ISE Index(USD)') 
-# giving a title to my graph 
-plt.title('Final Model Application on Test Set') 
-#change params on this one
-plt.plot(x_test, final_thetas[0] +  final_thetas[1] * x_test, color = 'red', label ='Final Model Approximation.')
-plt.legend(framealpha=1, frameon=True, loc = 'lower right');
-# function to show the plot 
-plt.show()
+predictors = ["intercept", "x1", "x2", "x3", "x4"]
+
+final_model_file = open("final_model.txt", "w")
+
+final_model_file.write("Final Model:\n")
+for i in range(len(final_thetas)):
+    final_model_file.write( str(final_thetas[i]) + predictors[i] + "+")
+final_model_file.write("\n\nMSE " + str(final_mse))
+
+final_model_file.close()
+
+
+
+
+
+
+
+
+
 
 
 
