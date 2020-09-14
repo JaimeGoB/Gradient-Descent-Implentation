@@ -23,14 +23,6 @@ stocks = pd.read_csv(url)
 stocks.rename(columns={"ISE.1": "ISE(USD)"}, inplace =True)
 stocks.rename(columns={"EM": "Emerging-Markets-Index"}, inplace =True)
 
-#Droping ISE because we are interested in ISE(USD)
-stocks.drop(['ISE'], axis=1, inplace = True)
-stocks.drop(['date'], axis=1, inplace = True)
-stocks.drop(['SP'], axis=1, inplace = True)
-stocks.drop(['NIKKEI'], axis=1, inplace = True)
-stocks.drop(['BOVESPA'], axis=1, inplace = True)
-
-
 #checking for missing values or NaN
 stocks.isna().sum()
 
@@ -44,6 +36,14 @@ plt.show()
 correlation_matrix = stocks.corr().round(2)
 #annot = True to print the values inside the square
 sns.heatmap(data=correlation_matrix, annot=True).set_title('Heat Map')
+
+#Droping ISE because we are interested in ISE(USD)
+stocks.drop(['ISE'], axis=1, inplace = True)
+stocks.drop(['date'], axis=1, inplace = True)
+stocks.drop(['SP'], axis=1, inplace = True)
+stocks.drop(['NIKKEI'], axis=1, inplace = True)
+stocks.drop(['BOVESPA'], axis=1, inplace = True)
+
 
 ###################
 #Normalizing dataset
@@ -68,7 +68,6 @@ X.insert (0, 'intercetp', intercept)
 
 Y = stocks[['ISE(USD)']]
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=.2, random_state=101)
-
 
 ##################################
 #5. Develop a Gradient Descent Optimizer Model
@@ -150,6 +149,29 @@ def Adaptive_Gradient_Descent(X, Y, thetas, learning_rate = 1e-2, iterations = 3
             total_cost.append(cost)
         
     return (thetas_update, total_cost)
+
+def Adjusted_R2(X_test, Y_test, final_thetas):
+    
+    #Hypothesis function (predict the value of y (y_hat) ) 
+    #[1 X 428]
+    h_0 =hypothesis_function(X_test, final_thetas)    
+    
+    #Sum of loss (sum of squared error) - PART2 Equation 
+    #[1 X 428]
+    error_difference = compute_error_difference( Y_test, h_0)
+    
+    # #Sum all errors from vector 
+    # #[1 X 1]
+    sum_squared_error = np.sum(np.square(error_difference))    
+    
+    # #Sum y_actual - y_bar
+    # #[1 X 1]
+    sum_squared_total = np.sum(np.square(np.subtract(Y_test, (np.mean(Y_test) ) ) ) )
+    #keeping r2 between 0-1
+    r_squared = abs(1 - (float(sum_squared_error )) / sum_squared_total)
+    adj_r_squared = 1 - (1-r_squared)*(len(Y_test)-1)/(len(Y_test)-X_test.shape[1]-1)
+    
+    return r_squared,adj_r_squared
     
 ################################################
 #Tuning parameters(learning rate, iteration and thetas)
@@ -162,25 +184,26 @@ log_data = pd.DataFrame(columns = {"lr", "iterations", "weights", "mse"})
 log_data = log_data[["weights", "lr", "iterations", "mse"]]
 
 learning_rate_values = [.01, .001, .0001]
+number_of_trials = [100, 250]
 
-trials_100 = 100
-for lr in learning_rate_values:
-    
-    #initializing weights to random values.
-    random_thetas = random_initialization_thetas()
-    fitted_thetas, loss = Adaptive_Gradient_Descent(X_train, Y_train, random_thetas, lr, trials_100)
-    
-    #plotting cost vs iterations
-    plt.figure()
-    plt.plot(loss)
-    plt.title('AdaGrad')
-    plt.xlabel('Training Iterations')
-    plt.ylabel('Cost ')
-    plt.show()
-    
-    #adding information about iterations, thetas and mse to log file
-    new_row = {"lr": lr, "iterations": trials_100, "weights": fitted_thetas, "mse":loss}
-    log_data = log_data.append(new_row, ignore_index=True)
+for n in number_of_trials:
+    for lr in learning_rate_values:
+        
+        #initializing weights to random values.
+        random_thetas = random_initialization_thetas()
+        fitted_thetas, loss = Adaptive_Gradient_Descent(X_train, Y_train, random_thetas, lr, n)
+        
+        #plotting cost vs iterations
+        plt.figure()
+        plt.plot(loss)
+        plt.title('AdaGrad')
+        plt.xlabel('Training Iterations')
+        plt.ylabel('Cost ')
+        plt.show()
+        
+        #adding information about iterations, thetas and mse to log file
+        new_row = {"lr": lr, "iterations": n, "weights": fitted_thetas, "mse":loss}
+        log_data = log_data.append(new_row, ignore_index=True)
     
 
 ################################################
@@ -227,8 +250,11 @@ final_mse = next(iter(descending_dict_mse))
 #Index 0 - theta_0 (intercept)
 #Index 1 - theta_1 (slope)
 final_thetas = descending_dict_mse[final_mse]
-
-
+#r2 - relationship between model & response
+#ajdr2 - goodness of fit
+r2, adjr2 = Adjusted_R2(X_test, Y_test, final_thetas)
+final_r2 = str(r2[0])
+final_adjr2 = str(adjr2[0])
 ###############################
 #writing a file that contains a full equation to the final model with the line 
 #of best fit using the most optomized weights with least MSE.
@@ -242,6 +268,8 @@ final_model_file.write("Final Model:\n")
 for i in range(len(final_thetas)):
     final_model_file.write( str(final_thetas[i]) + predictors[i] + "+")
 final_model_file.write("\n\nMSE " + str(final_mse))
+final_model_file.write("\n\nR2 " + final_r2)
+final_model_file.write("\n\nAdjusted R2 " + str(final_adjr2))
 
 final_model_file.close()
 
