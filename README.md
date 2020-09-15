@@ -21,7 +21,7 @@ seaborn
 
 #### 2) How to run part1.py
 
-  Option 1: Run all the file at once using F5(green play buton).
+  Option 1: Run entire code from file at once using F5(green play buton).
   
   Option 2: Run the file by parts. Run lines 1-180, then lines 181-209 then 210-262 and finaly lines 263 to end of file
   
@@ -38,7 +38,7 @@ seaborn
 
 #### 3) How to run part2.py
 
-  Option 1: Run all the file at once using F5(green play buton).
+  Option 1: Run entire code from file at once using F5(green play buton).
   
   Option 2: Run the file by parts. Run lines 1-110 and finaly lines 110 to end of file
   
