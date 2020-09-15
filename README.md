@@ -105,7 +105,7 @@ For 100 iterations using .01, .001 and .0001 learning rate value.
 For 250 iterations using .01, .001 and .0001 learning rate value.
 <p float="left">
   <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.01-250.png" width=150 height=150   />
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.001-250.png" width=150 height=200   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.001-250.png" width=150 height=150   />
   <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.0001-250.png" width=150 height=150   />
 </p>
 
