@@ -118,7 +118,7 @@ def random_initialization_thetas():
    return [np.random.normal(0, 0.01, (5,1))]
 
 
-def Adaptive_Gradient_Descent(X, Y, thetas, learning_rate = 1e-2, iterations = 3, eps = 1e-6):
+def Adaptive_Gradient_Descent(X, Y, thetas, learning_rate = 1e-2, iterations = 100, eps = 1e-6):
 
     #getting number of observations
     n = float(len(X))
@@ -169,6 +169,7 @@ def Adjusted_R2(X_test, Y_test, final_thetas):
     sum_squared_total = np.sum(np.square(np.subtract(Y_test, (np.mean(Y_test) ) ) ) )
     #keeping r2 between 0-1
     r_squared = abs(1 - (float(sum_squared_error )) / sum_squared_total)
+    #adj r2 function
     adj_r_squared = 1 - (1-r_squared)*(len(Y_test)-1)/(len(Y_test)-X_test.shape[1]-1)
     
     return r_squared,adj_r_squared
@@ -225,8 +226,8 @@ optimal_thetas = log_data[["weights"]]
 #creating empty hashmap to store MSE and respective thetas(theta_0 & theta_1)
 test_cost_and_optimal_paramters = {}
 
-#Iterating through all the optimal weights and
-#testing them on the testing set.
+#Iterating through all the weights and
+#testing ALL OF THEM on the testing set to get lowest cost.
 #We will calculate MSE for each set of thetas(theta_0 and theta_1)
 #The MSE will be stored in a dictionary with respective weights/thetas.
 for i, j in optimal_thetas.iterrows(): 
@@ -262,7 +263,7 @@ final_adjr2 = str(adjr2[0])
 
 predictors = ["intercept", "x1", "x2", "x3", "x4"]
 
-final_model_file = open("final_model.txt", "w")
+final_model_file = open("final_model_adagrad.txt", "w")
 
 final_model_file.write("Final Model:\n")
 for i in range(len(final_thetas)):
