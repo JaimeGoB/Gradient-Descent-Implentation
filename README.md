@@ -12,9 +12,11 @@ seaborn
 
 ### They have to be run in Spyer IDE from Anaconda.
 
-#### Steps
+### STEPS:
 
 #### 1) Remove all txt files from the project. 
+<br>
+
 
 #### 2) How to run part1.py
 
@@ -29,9 +31,8 @@ seaborn
   A "final_model_adagrad.txt" file be created at the end of running part1.py.
   
   #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
-  
-  
-  
+<br>
+
 #### 3) How to run part2.py
 
   Option 1: Run all the file at once using F5(green play buton).
