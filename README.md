@@ -25,15 +25,13 @@ seaborn
   
   Option 2: Run the file by parts. Run lines 1-180, then lines 181-209 then 210-262 and finaly lines 263 to end of file
   
-<div align="center">
-  A "log.txt" file be created at the end of running part1.py.
++  A "log.txt" file be created at the end of running part1.py.
   
-  #### The file "log.txt" was just provided as pre-requiste and proof of the "logs" from parameter tunning.
++ #### The file "log.txt" was just provided as pre-requiste and proof of the "logs" from parameter tunning.
   
-  A "final_model_adagrad.txt" file be created at the end of running part1.py.
++  A "final_model_adagrad.txt" file be created at the end of running part1.py.
   
-  #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
-</div>
++ #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
 
   
 <br>
@@ -44,9 +42,9 @@ seaborn
   
   Option 2: Run the file by parts. Run lines 1-110 and finaly lines 110 to end of file
   
-  A "final_model_linear_regression.txt" file be created at the end of running part1.py.
++  A "final_model_linear_regression.txt" file be created at the end of running part1.py.
   
-  #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
++  #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
   
 
 # Section 1 - Adaptive Gradient Descent Optimizer - Equations
