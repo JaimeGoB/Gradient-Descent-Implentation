@@ -80,8 +80,8 @@ We performed a thorough and rigorous analysis of the dataset. We started by chec
 We then moved on to apply a heat to choose attributes with correlation higher than 50%.
 
 <p float="left">
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/normality_check.png" width=300 height=300   />
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/heat_map.png" width=300 height=300  /> 
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/normality_check.png" width=200 height=200   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/heat_map.png" width=200 height=200  /> 
 </p>
 
 
@@ -97,16 +97,16 @@ Below we can see plots from running the model with different parameters:
 For 100 iterations using .01, .001 and .0001 learning rate value.
 
 <p float="left">
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.01-100.png" width=200 height=200   />
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.001-100.png" width=200 height=200   />
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.0001-100.png" width=200 height=200   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.01-100.png" width=150 height=150   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.001-100.png" width=150 height=150   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.0001-100.png" width=150 height=150   />
 </p>
 
 For 250 iterations using .01, .001 and .0001 learning rate value.
 <p float="left">
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.01-250.png" width=200 height=200   />
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.001-250.png" width=200 height=200   />
-  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.0001-250.png" width=200 height=200   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.01-250.png" width=150 height=150   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.001-250.png" width=150 height=200   />
+  <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.0001-250.png" width=150 height=150   />
 </p>
 
 # Section 4 - Final Fitted Model Equations
