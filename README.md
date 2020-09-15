@@ -2,20 +2,21 @@
 
 # Section 0 - How to run the code
 
-#### Libraries Pre-Requisites:
+### Libraries Pre-Requisites:
 pandas, 
 numpy, 
 matplotlib.pyplot, 
 seaborn
 
-#### The files cannot be run through command line.
+### The files cannot be run through command line.
 
-#### They have to be run in Spyer IDE from Anaconda.
+### They have to be run in Spyer IDE from Anaconda.
 
+#### Steps
 
-1) Remove all txt files from the project. 
+#### 1) Remove all txt files from the project. 
 
-2) How to run part1.py
+#### 2) How to run part1.py
 
   Option 1: Run all the file at once using F5(green play buton).
   
@@ -29,7 +30,9 @@ seaborn
   
   #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
   
-3) How to run part2.py
+  
+  
+#### 3) How to run part2.py
 
   Option 1: Run all the file at once using F5(green play buton).
   
@@ -38,6 +41,7 @@ seaborn
   A "final_model_linear_regression.txt" file be created at the end of running part1.py.
   
   #### The files "final_model_adagrad.txt" contain the final fitted model and their performance metrics
+  
 
 # Section 1 - Adaptive Gradient Descent Optimizer - Equations
 
