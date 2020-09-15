@@ -1,4 +1,4 @@
-# Section 1 - How to run the code
+# Section 0 - How to run the code
 
 #### Libraries Pre-Requisites:
 pandas, 
@@ -25,7 +25,7 @@ seaborn
   
   Option 2: Run the file by parts. Run lines 1-110 and finaly lines 110 to end of file
 
-# Section 2 - Adaptive Gradient Descent Optimizer - Equations
+# Section 1 - Adaptive Gradient Descent Optimizer - Equations
 
 We can define the following equation as the hypothesis function. Where theta is a matrix containing the relative weights(coefficients in linear regression) and x is matrix of relevant data.
 
@@ -45,7 +45,7 @@ The Adaptive Gradient Descent optimizer update equation is as follow:
 
 <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/adaptive_gradient_descent.png" length = 400 width="400"/>
 
-# Section 3 - ISTANBUL STOCK EXCHANGE Data Set 
+# Section 2 - ISTANBUL STOCK EXCHANGE Data Set 
 xFinal Fitted Model Performance
 Data sets includes returns of Istanbul Stock Exchange with seven other international index; SP, DAX, FTSE, NIKKEI, BOVESPA, MSCE_EU, MSCI_EM from Jun 5, 2009 to Feb 22, 2011.
 About the dataset:
@@ -63,7 +63,7 @@ We then moved on to apply a heat to choose attributes with correlation higher th
 </p>
 
 
-# Section 4 - Final Fitted Model Performance
+# Section 3 - Final Fitted Model Performance
 
 After running our final fitted model with the optimal parameters(thetas/weights). The model performance metrics from our model to the test data set is as follows:
 MSE 0.00021469897563200808
@@ -87,7 +87,7 @@ For 250 iterations using .01, .001 and .0001 learning rate value.
   <img src="https://github.com/JaimeGoB/Gradient-Descent-Implentation/blob/master/images/lr.0001-250.png" width=300 height=300   />
 </p>
 
-# Section 5 - Final Fitted Model Equations
+# Section 4 - Final Fitted Model Equations
 
 ### Using custom Adaptive Gradient Descent Optimizer:
 [0.001023]intercept+[-0.004590]x1 +[0.01299]x2+[0.0001234]x3+[0.009954]x4
