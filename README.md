@@ -1,5 +1,30 @@
 # Section 1 - How to run the code
 
+#### Libraries Pre-Requisites:
+pandas, 
+numpy, 
+matplotlib.pyplot, 
+seaborn
+
+#### The files cannot be run through command line.
+#### They have to be run in Spyer IDE from Anaconda.
+
+1) git clone https://github.com/JaimeGoB/Gradient-Descent-Implentation
+
+2) remove all txt files from the project.
+
+3) How to run part1.py
+
+  Option 1: Run all the file at once using F5(green play buton).
+  
+  Option 2: Run the file by parts. Run lines 1-180, then lines 181-209 then 210-262 and finaly lines 263 to end of file
+  
+4) How to run part2.py
+
+  Option 1: Run all the file at once using F5(green play buton).
+  
+  Option 2: Run the file by parts. Run lines 1-110 and finaly lines 110 to end of file
+
 # Section 2 - Adaptive Gradient Descent Optimizer - Equations
 
 We can define the following equation as the hypothesis function. Where theta is a matrix containing the relative weights(coefficients in linear regression) and x is matrix of relevant data.
