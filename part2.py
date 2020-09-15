@@ -12,11 +12,11 @@ from sklearn import metrics
 from sklearn.linear_model import SGDRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
-
-
+##################################
+#Jaime Goicoechea - Caleb Captain
+##################################
 ##################################
 #3. Data-Preprocessing
 ##################################
